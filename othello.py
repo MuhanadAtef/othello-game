@@ -281,7 +281,8 @@ class Othello:
     # depth -> depth of the tree
     # turn -> white if turn ==1 and black if -1
     def normalMoveGenerator(self, state_node, depth, turn):
-        if depth <= 0:
+        if depth == 0:
+            state_node.value = self.evaluate(state_node.state)
             return
         # Get indices of white/black discs of the state
         ones = np.where(state_node.state == turn)
