@@ -1,5 +1,7 @@
 import numpy as np
 
+from agent import Agent
+
 
 class Node:
     def __init__(self, n):
@@ -9,7 +11,7 @@ class Node:
 
 
 class Othello:
-    def __init__(self, size, turn):
+    def __init__(self, size):
         self.size = size  # Size of othello board
         self.game_over = False  # To check if the game is over
         initial_node = np.zeros((self.size, self.size))
@@ -18,7 +20,6 @@ class Othello:
         initial_node[n // 2 - 1][n // 2] = 1
         initial_node[n // 2][n // 2 - 1] = 1
         self.state = initial_node  # Hold the state node of othello board
-        self.turn = turn  # 1 for white, -1 for black
 
     # Here we will check for each disc and check for disc (left, right, diagonal)
     # to see if we can place discs to flip the opponent discs
@@ -38,7 +39,7 @@ class Othello:
             add_disc = True
             if disc[1] > 0 and state[left_disc[0]][left_disc[1]] == -state[disc[0]][disc[1]]:
                 # Loop until find a gap or disc of the same color
-                while state[left_disc[0]][left_disc[1]] != 0 and left_disc[1] >= 0:
+                while left_disc[1] >= 0 and state[left_disc[0]][left_disc[1]] != 0:
                     if state[left_disc[0]][left_disc[1]] == state[disc[0]][disc[1]]:  # Disc of the same color
                         add_disc = False
                         break
@@ -60,7 +61,7 @@ class Othello:
             add_disc = True
             if disc[1] < self.size - 1 and state[right_disc[0]][right_disc[1]] == -state[disc[0]][disc[1]]:
                 # Loop until find a gap or disc of the same color
-                while state[right_disc[0]][right_disc[1]] != 0 and right_disc[1] <= self.size - 1:
+                while right_disc[1] <= self.size - 1 and state[right_disc[0]][right_disc[1]] != 0:
                     if state[right_disc[0]][right_disc[1]] == state[disc[0]][
                         disc[1]]:  # Disc of the same color
                         add_disc = False
@@ -83,7 +84,7 @@ class Othello:
             add_disc = True
             if disc[0] > 0 and state[up_disc[0]][up_disc[1]] == -state[disc[0]][disc[1]]:
                 # Loop until find a gap or disc of the same color
-                while state[up_disc[0]][up_disc[1]] != 0 and up_disc[0] >= 0:
+                while up_disc[0] >= 0 and state[up_disc[0]][up_disc[1]] != 0:
                     if state[up_disc[0]][up_disc[1]] == state[disc[0]][disc[1]]:  # Disc of the same color
                         add_disc = False
                         break
@@ -105,7 +106,7 @@ class Othello:
             add_disc = True
             if disc[0] < self.size - 1 and state[down_disc[0]][down_disc[1]] == -state[disc[0]][disc[1]]:
                 # Loop until find a gap or disc of the same color
-                while state[down_disc[0]][down_disc[1]] != 0 and down_disc[0] <= self.size - 1:
+                while down_disc[0] <= self.size - 1 and state[down_disc[0]][down_disc[1]] != 0:
                     if state[down_disc[0]][down_disc[1]] == state[disc[0]][disc[1]]:  # Disc of the same color
                         add_disc = False
                         break
@@ -128,7 +129,7 @@ class Othello:
             add_disc = True
             if disc[1] > 0 and disc[0] > 0 and state[up_left_disc[0]][up_left_disc[1]] == -state[disc[0]][disc[1]]:
                 # Loop until find a gap or disc of the same color
-                while state[up_left_disc[0]][up_left_disc[1]] != 0 and (up_left_disc[1] >= 0 and up_left_disc[0] >= 0):
+                while (up_left_disc[1] >= 0 and up_left_disc[0] >= 0) and state[up_left_disc[0]][up_left_disc[1]] != 0:
                     if state[up_left_disc[0]][up_left_disc[1]] == state[disc[0]][disc[1]]:  # Disc of the same color
                         add_disc = False
                         break
@@ -158,8 +159,8 @@ class Othello:
             if disc[1] < self.size - 1 and disc[0] > 0 and state[up_right_disc[0]][up_right_disc[1]] == -state[disc[0]][
                 disc[1]]:
                 # Loop until find a gap or disc of the same color
-                while state[up_right_disc[0]][up_right_disc[1]] != 0 and (
-                        up_right_disc[1] <= self.size - 1 and up_right_disc[0] >= 0):
+                while (up_right_disc[1] <= self.size - 1 and up_right_disc[0] >= 0) and \
+                        state[up_right_disc[0]][up_right_disc[1]] != 0:
                     if state[up_right_disc[0]][up_right_disc[1]] == state[disc[0]][disc[1]]:  # Disc of the same color
                         add_disc = False
                         break
@@ -168,9 +169,9 @@ class Othello:
                 # Add disc if it will cause a change in state (discs flip)
                 if add_disc and (up_right_disc[1] <= self.size - 1 and up_right_disc[0] >= 0):
                     key = tuple(up_right_disc)
-                    list1 = range(disc[0], up_right_disc[0] + 1)
-                    list2 = range(up_right_disc[1], disc[1] + 1)
-                    indices = [[list1[i], list2[i]] for i in range(len(list1))]
+                    list1 = range(up_right_disc[0], disc[0] + 1)
+                    list2 = range(disc[1], up_right_disc[1] + 1)
+                    indices = [[list1[i], list2[len(list1) - 1 - i]] for i in range(len(list1))]
                     if key in states_dictionary.keys():
                         for index in indices:
                             states_dictionary[key][index[0]][index[1]] = state[disc[0]][disc[1]]
@@ -189,8 +190,8 @@ class Othello:
             if disc[1] > 0 and disc[0] < self.size - 1 and state[down_left_disc[0]][down_left_disc[1]] == - \
                     state[disc[0]][disc[1]]:
                 # Loop until find a gap or disc of the same color
-                while state[down_left_disc[0]][down_left_disc[1]] != 0 and (
-                        down_left_disc[1] >= 0 and down_left_disc[0] <= self.size - 1):
+                while (down_left_disc[1] >= 0 and down_left_disc[0] <= self.size - 1) and \
+                        state[down_left_disc[0]][down_left_disc[1]] != 0:
                     if state[down_left_disc[0]][down_left_disc[1]] == state[disc[0]][disc[1]]:  # Disc of the same color
                         add_disc = False
                         break
@@ -201,7 +202,7 @@ class Othello:
                     key = tuple(down_left_disc)
                     list1 = range(disc[0], down_left_disc[0] + 1)
                     list2 = range(down_left_disc[1], disc[1] + 1)
-                    indices = [[list1[i], list2[i]] for i in range(len(list1))]
+                    indices = [[list1[len(list1) - 1 - i], list2[i]] for i in range(len(list1))]
                     if key in states_dictionary.keys():
                         for index in indices:
                             states_dictionary[key][index[0]][index[1]] = state[disc[0]][disc[1]]
@@ -220,8 +221,8 @@ class Othello:
             if disc[1] < self.size - 1 and disc[0] < self.size - 1 and state[down_right_disc[0]][
                 down_right_disc[1]] == -state[disc[0]][disc[1]]:
                 # Loop until find a gap or disc of the same color
-                while state[down_right_disc[0]][down_right_disc[1]] != 0 and (
-                        down_right_disc[1] <= self.size - 1 and down_right_disc[0] <= self.size - 1):
+                while (down_right_disc[1] <= self.size - 1 and down_right_disc[0] <= self.size - 1) and \
+                        state[down_right_disc[0]][down_right_disc[1]] != 0:
                     if state[down_right_disc[0]][down_right_disc[1]] == state[disc[0]][
                         disc[1]]:  # Disc of the same color
                         add_disc = False
@@ -247,7 +248,7 @@ class Othello:
 
     # state -> the current state to get its children
     # depth -> depth of the tree
-    # turn -> white if turn ==1 and black if -1
+    # turn -> white if turn == 1 and black if -1
     def normalMoveGenerator(self, state_node, depth, turn):
         if depth == 0:
             state_node.value = self.evaluate(state_node.state)
@@ -255,6 +256,8 @@ class Othello:
         # Get indices of white/black discs of the state
         ones = np.where(state_node.state == turn)
         children = self.whereToPlaceDiscs(state_node.state, ones)
+        if len(children) == 0:
+            self.game_over = True
         for child in children:
             node = Node(self.size)
             node.state = child
@@ -265,13 +268,36 @@ class Othello:
     def evaluate(self, state):
         return np.sum(state)
 
+    def checkGameState(self):
+        zeros = np.where(self.state == 0)
+        if self.game_over or len(zeros) == 0:
+            return True
+        return False
+
 
 if __name__ == "__main__":
     n = 8
-    othello = Othello(n, 1)
-    state = othello.state
-    state_node = Node(othello.size)
-    state_node.state = state
-    othello.normalMoveGenerator(state_node, 3, othello.turn)
-    othello.turn *= -1
-    print(state)
+    depth = 3
+    othello = Othello(n)
+    white = Agent(othello, 1)
+    black = Agent(othello, -1)
+    # Game loop
+    while not othello.checkGameState():
+        state_node = Node(n)
+        # White turn
+        state_node.state = np.copy(othello.state)
+        othello.normalMoveGenerator(state_node, depth, white.turn)
+        value, state = white.alphaBetaPruning(state_node, depth, -10e15, 10e15, True)
+        othello.state = state
+        print("White turn\n")
+        print(othello.state)
+        # Black turn
+        state_node.state = np.copy(othello.state)
+        othello.normalMoveGenerator(state_node, depth, black.turn)
+        value, state = white.alphaBetaPruning(state_node, depth, -10e15, 10e15, False)
+        othello.state = state
+        print("Black turn\n")
+        print(othello.state)
+    print("======================Game Over !!!===========================")
+    print("White score:", np.count_nonzero(othello.state == 1))
+    print("Black score:", np.count_nonzero(othello.state == -1))

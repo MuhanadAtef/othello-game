@@ -1,8 +1,9 @@
 class Agent:
     # game -> game object
-    # maximize -> choose the current state to maximize (True), or minimize (False)
-    def __init__(self, game):
+    # turn -> 1 for white and -1 for black
+    def __init__(self, game, turn):
         self.game = game
+        self.turn = turn
 
     # root -> current state of the tree
     # depth -> depth of the tree
@@ -14,12 +15,12 @@ class Agent:
             # Check if the evaluation value is computed
             if root.value == None:
                 root.value = self.game.evaluate(root.state)
-            return root.value
+            return root.value, None
         optimal_move = root.state
         if maximize:
             max_evaluation = -10e15
             for i in root.child:
-                evaluation = self.alphaBetaPruning(i, depth - 1, alpha, beta, not maximize)
+                evaluation, _ = self.alphaBetaPruning(i, depth - 1, alpha, beta, not maximize)
                 # Update max value and alpha
                 if max_evaluation < evaluation:
                     optimal_move = i.state
@@ -32,12 +33,12 @@ class Agent:
         else:
             min_evaluation = 10e15
             for i in root.child:
-                evaluation = self.alphaBetaPruning(i, depth - 1, alpha, beta, not maximize)
+                evaluation, _ = self.alphaBetaPruning(i, depth - 1, alpha, beta, not maximize)
                 # Update min value and beta
                 if min_evaluation > evaluation:
                     optimal_move = i.state
                     min_evaluation = evaluation
-                beta = min(alpha, min_evaluation)
+                beta = min(beta, min_evaluation)
                 if beta <= alpha:
                     break
             root.value = min_evaluation
