@@ -14,7 +14,7 @@ class Agent:
         if not root.child or depth == 0:
             # Check if the evaluation value is computed
             if root.value == None:
-                root.value = self.game.evaluate(root.state)
+                root.value = self.game.heuristic(root.state)
             return root.value, None
         optimal_move = root.state
         if maximize:
