@@ -3,7 +3,7 @@ import numpy as np
 
 class Node:
     def __init__(self, n):
-        self.value = 0
+        self.value = None
         self.child = []
         self.state = np.zeros((n, n))
 
@@ -11,6 +11,7 @@ class Node:
 class Othello:
     def __init__(self, size, turn):
         self.size = size  # Size of othello board
+        self.game_over = False  # To check if the game is over
         initial_node = np.zeros((self.size, self.size))
         initial_node[n // 2 - 1][n // 2 - 1] = -1
         initial_node[n // 2][n // 2] = -1
@@ -186,7 +187,7 @@ class Othello:
             down_left_disc[0] += 1
             add_disc = True
             if disc[1] > 0 and disc[0] < self.size - 1 and state[down_left_disc[0]][down_left_disc[1]] == - \
-            state[disc[0]][disc[1]]:
+                    state[disc[0]][disc[1]]:
                 # Loop until find a gap or disc of the same color
                 while state[down_left_disc[0]][down_left_disc[1]] != 0 and (
                         down_left_disc[1] >= 0 and down_left_disc[0] <= self.size - 1):
