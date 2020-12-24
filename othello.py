@@ -281,8 +281,8 @@ class Othello:
 
 if __name__ == "__main__":
     n = 8
-    white_depth = 2
-    black_depth = 2
+    white_depth = 3
+    black_depth = 3
     othello = Othello(n)
     white = Agent(othello, 1)
     black = Agent(othello, -1)
@@ -296,8 +296,8 @@ if __name__ == "__main__":
         # If white can play then change the game state
         if state is not None:
             othello.state = state
-            print("White turn\n")
-            print(othello.state)
+            print("White turn")
+            print(othello.state, "\n")
         if othello.game_over_white and othello.game_over_black:
             break
         # Black turn
@@ -309,8 +309,8 @@ if __name__ == "__main__":
         if state is not None:
             othello.state = state
             othello.state = state
-            print("Black turn\n")
-            print(othello.state)
-    print("======================Game Over !!!===========================")
+            print("Black turn")
+            print(othello.state, "\n")
+    print("======================== Game Over !!! ===========================")
     print("White score:", np.count_nonzero(othello.state == 1))
     print("Black score:", np.count_nonzero(othello.state == -1))
