@@ -13,6 +13,7 @@ def alphaBetaPruning(root, depth, alpha, beta, maximize):
             evaluation = alphaBetaPruning(i, depth - 1, alpha, beta, not maximize)
             # Update max value and alpha
             max_evaluation = max(max_evaluation, evaluation)
+            i.value = max_evaluation
             alpha = max(alpha, max_evaluation)
             if beta <= alpha:
                 break
@@ -24,6 +25,7 @@ def alphaBetaPruning(root, depth, alpha, beta, maximize):
             evaluation = alphaBetaPruning(i, depth - 1, alpha, beta, not maximize)
             # Update min value and beta
             min_evaluation = min(min_evaluation, evaluation)
+            i.value = min_evaluation
             beta = min(alpha, min_evaluation)
             if beta <= alpha:
                 break
