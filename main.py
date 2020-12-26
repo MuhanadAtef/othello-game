@@ -6,12 +6,12 @@ from othello import Othello, Node
 
 def writeToFile(size, white_depth, black_depth, avg_white_time, avg_black_time, total_game_time, white_score,
                 black_score, avg_branch_white, eff_branch_white, avg_branch_black, eff_branch_black):
-    f = open("Result.txt", "w")
+    f = open("Result.txt", "a")
     f.write("Board size: " + str(size) + "\n")
     f.write("White depth: " + str(white_depth) + "\n")
     f.write("Black depth: " + str(black_depth) + "\n")
-    f.write("Average white time: " + str(avg_white_time) + " sec\n")
-    f.write("Average black time: " + str(avg_black_time) + " sec\n")
+    f.write("Average white turn time: " + str(avg_white_time) + " sec\n")
+    f.write("Average black turn time: " + str(avg_black_time) + " sec\n")
     f.write("Total game time: " + str(total_game_time) + " sec\n")
     f.write("White score:" + str(white_score) + "\n")
     f.write("Black score:" + str(black_score) + "\n")
@@ -25,15 +25,15 @@ def writeToFile(size, white_depth, black_depth, avg_white_time, avg_black_time, 
 
 if __name__ == "__main__":
     n = 8  # Size of othello board
-    white_depth = 3  # Depth of white agent tree
-    black_depth = 3  # Depth of black agent tree
+    white_depth = 1  # Depth of white agent tree
+    black_depth = 8  # Depth of black agent tree
     game_over = 0  # Equals 2 when both black and white can't play
     num_turns_white = 0  # Number of turns of white agent
     num_turns_black = 0  # Number of turns of black agent
     white_playing_time = 0      # White time playing
     black_playing_time = 0      # Black time playing
     othello = Othello(n)
-    white = Agent(1, othello.heuristic, othello.orderedMoveGenerator)
+    white = Agent(1, othello.heuristic, othello.normalMoveGenerator)
     black = Agent(-1, othello.heuristic, othello.normalMoveGenerator)
     print("Initial State")
     print(othello.state)
@@ -82,12 +82,12 @@ if __name__ == "__main__":
     print("============================ Time ================================")
     print("Time elapsed = ", total_time, " sec")
     print("==================== Average branching factor ====================")
-    avg_branch_white = np.ceil(white.traversed_nodes / (white.traversed_nodes - white.leaf_nodes))
-    eff_branch_white = np.ceil(np.power(white.traversed_nodes / (white_depth * num_turns_white), 1 / white_depth))
+    avg_branch_white = (white.traversed_nodes / (white.traversed_nodes - white.leaf_nodes))
+    eff_branch_white = (np.power(white.traversed_nodes / (white_depth * num_turns_white), 1 / white_depth))
     print("Average branching factor (White agent) = ", avg_branch_white)
     print("Effective branching factor (White agent) = ", eff_branch_white)
-    avg_branch_black = np.ceil(black.traversed_nodes / (black.traversed_nodes - black.leaf_nodes))
-    eff_branch_black = np.ceil(np.power(black.traversed_nodes / (black_depth * num_turns_black), 1 / black_depth))
+    avg_branch_black = (black.traversed_nodes / (black.traversed_nodes - black.leaf_nodes))
+    eff_branch_black = (np.power(black.traversed_nodes / (black_depth * num_turns_black), 1 / black_depth))
     print("Average branching factor (Black agent) = ", avg_branch_black)
     print("Effective branching factor (Black agent) = ", eff_branch_black)
     writeToFile(n, white_depth, black_depth, white_playing_time/num_turns_white, black_playing_time/num_turns_black,

@@ -282,7 +282,7 @@ class Othello:
             state_node.child.append(node)
 
     # state -> state to be evaluated
-    # turn
+    # turn -> turn of the state
     def heuristic(self, state, turn=None):
         return np.sum(state)
 

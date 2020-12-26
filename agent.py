@@ -36,9 +36,9 @@ class Agent:
                     optimal_move = i.state
                     max_evaluation = evaluation
                 alpha = max(alpha, max_evaluation)
+                self.traversed_nodes += 1
                 if beta <= alpha:
                     break
-                self.traversed_nodes += 1
             root.value = max_evaluation
             return max_evaluation, optimal_move
         else:
@@ -50,8 +50,8 @@ class Agent:
                     optimal_move = i.state
                     min_evaluation = evaluation
                 beta = min(beta, min_evaluation)
+                self.traversed_nodes += 1
                 if beta <= alpha:
                     break
-                self.traversed_nodes += 1
             root.value = min_evaluation
             return min_evaluation, optimal_move
