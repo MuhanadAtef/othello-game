@@ -12,12 +12,12 @@ class Agent:
     # alpha -> alpha value
     # beta -> beta value
     def alphaBetaPruning(self, root, depth, alpha, beta, maximize, turn):
-        self.move_generator(root, depth, turn, self.heuristic)
+        self.move_generator(root, depth, turn, self.heuristic, self.turn)
         # If we reach leaves of the tree then select generator to goto next state
         if not root.child or depth == 0:
             # Check if the evaluation value is computed
             if root.value is None:
-                root.value = self.heuristic(root.state)
+                root.value = self.heuristic(root.state, self.turn)
             return root.value, None
         optimal_move = root.state
         if maximize:

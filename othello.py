@@ -248,9 +248,10 @@ class Othello:
     # state -> the current state to get its children
     # depth -> depth of the tree
     # turn -> white if turn == 1 and black if -1
-    def normalMoveGenerator(self, state_node, depth, turn, heuristic):
+    # agent -> 1 for white, 0 for black
+    def normalMoveGenerator(self, state_node, depth, turn, heuristic, agent):
         if depth == 0:
-            state_node.value = heuristic(state_node.state)
+            state_node.value = heuristic(state_node.state, agent)
             return
         # Get indices of white/black discs of the state
         ones = np.where(state_node.state == turn)
@@ -260,9 +261,9 @@ class Othello:
             node.state = child
             state_node.child.append(node)
 
-    def orderedMoveGenerator(self, state_node, depth, turn, heuristic):
+    def orderedMoveGenerator(self, state_node, depth, turn, heuristic, agent):
         if depth == 0:
-            state_node.value = heuristic(state_node.state)
+            state_node.value = heuristic(state_node.state, agent)
             return
         # Get indices of white/black discs of the state
         ones = np.where(state_node.state == turn)
@@ -282,8 +283,12 @@ class Othello:
             state_node.child.append(node)
 
     # state -> state to be evaluated
-    def heuristic(self, state):
+    # turn
+    def heuristic(self, state, turn=None):
         return np.sum(state)
+
+    def mobilityHeuristic(self, state, turn):
+        return len(self.whereToPlaceDiscs(state, np.where(state == turn)))
 
     def checkGameState(self):
         zeros = np.count_nonzero(self.state == 0)
@@ -293,9 +298,9 @@ class Othello:
 
 
 if __name__ == "__main__":
-    n = 8
-    white_depth = 5
-    black_depth = 5
+    n = 16
+    white_depth = 4
+    black_depth = 4
     othello = Othello(n)
     white = Agent(1, othello.heuristic, othello.normalMoveGenerator)
     black = Agent(-1, othello.heuristic, othello.normalMoveGenerator)
@@ -334,4 +339,4 @@ if __name__ == "__main__":
     print("White score:", np.count_nonzero(othello.state == 1))
     print("Black score:", np.count_nonzero(othello.state == -1))
     print("============================ Time ================================")
-    print("Time elapsed = ", str(end - start)," sec")
+    print("Time elapsed = ", str(end - start), " sec")
