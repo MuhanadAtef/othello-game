@@ -1,5 +1,5 @@
 import numpy as np
-
+import time
 from agent import Agent
 
 
@@ -13,8 +13,6 @@ class Node:
 class Othello:
     def __init__(self, size):
         self.size = size  # Size of othello board
-        self.game_over_white = False  # To check if the game is over for white moves
-        self.game_over_black = False  # To check if the game is over for black moves
         initial_node = np.zeros((self.size, self.size))
         initial_node[n // 2 - 1][n // 2 - 1] = -1
         initial_node[n // 2][n // 2] = -1
@@ -199,7 +197,7 @@ class Othello:
                     down_left_disc[1] -= 1
                     down_left_disc[0] += 1
                 # Add disc if it will cause a change in state (discs flip)
-                if add_disc and (down_left_disc[1] >= 0 and down_left_disc[0] <= self.size - 1) and state[down_left_disc[0]][down_left_disc[1]]:
+                if add_disc and (down_left_disc[1] >= 0 and down_left_disc[0] <= self.size - 1) and state[down_left_disc[0]][down_left_disc[1]] == 0:
                     key = tuple(down_left_disc)
                     list1 = range(disc[0], down_left_disc[0] + 1)
                     list2 = range(down_left_disc[1], disc[1] + 1)
@@ -250,23 +248,40 @@ class Othello:
     # state -> the current state to get its children
     # depth -> depth of the tree
     # turn -> white if turn == 1 and black if -1
-    def normalMoveGenerator(self, state_node, depth, turn):
+    def normalMoveGenerator(self, state_node, depth, turn, heuristic):
         if depth == 0:
-            state_node.value = self.heuristic(state_node.state)
+            state_node.value = heuristic(state_node.state)
             return
         # Get indices of white/black discs of the state
         ones = np.where(state_node.state == turn)
         children = self.whereToPlaceDiscs(state_node.state, ones)
-        if len(children) == 0 and turn == 1:
-            self.game_over_white = True
-        if len(children) == 0 and turn == -1:
-            self.game_over_black = True
-
         for child in children:
             node = Node(self.size)
             node.state = child
             state_node.child.append(node)
-            self.normalMoveGenerator(node, depth - 1, turn * -1)
+            self.normalMoveGenerator(node, depth - 1, turn * -1, heuristic)
+
+    def orderedMoveGenerator(self, state_node, depth, turn, heuristic):
+        if depth == 0:
+            state_node.value = heuristic(state_node.state)
+            return
+        # Get indices of white/black discs of the state
+        ones = np.where(state_node.state == turn)
+        children = self.whereToPlaceDiscs(state_node.state, ones)
+        # Get value of each child to reorder them
+        reordered_child = []
+        for i in range(len(children)):
+            reordered_child.append((heuristic(children[i]), i))
+        # Sort ascending
+        if turn == -1 and depth == 0:
+            sorted(reordered_child, key=lambda x: x[0])
+        elif depth == 0:
+            sorted(reordered_child, key=lambda x: x[0], reverse=True)
+        for val, child in reordered_child:
+            node = Node(self.size)
+            node.state = children[child]
+            state_node.child.append(node)
+            self.orderedMoveGenerator(node, depth - 1, turn * -1, heuristic)
 
     # state -> state to be evaluated
     def heuristic(self, state):
@@ -274,43 +289,53 @@ class Othello:
 
     def checkGameState(self):
         zeros = np.count_nonzero(self.state == 0)
-        if (self.game_over_white and self.game_over_black) or zeros == 0:
+        if zeros == 0:
             return True
         return False
 
 
 if __name__ == "__main__":
     n = 8
-    white_depth = 3
-    black_depth = 3
+    white_depth = 6
+    black_depth = 6
     othello = Othello(n)
     white = Agent(othello, 1)
     black = Agent(othello, -1)
+    game_over = 0   # Equals 2 when both black and white can't play
     # Game loop
-    while not othello.checkGameState():
+    start = time.time()
+    while (not othello.checkGameState()) and game_over < 2:
         state_node = Node(n)
         # White turn
         state_node.state = np.copy(othello.state)
-        othello.normalMoveGenerator(state_node, white_depth, white.turn)
+        othello.normalMoveGenerator(state_node, white_depth, white.turn, othello.heuristic)
         value, state = white.alphaBetaPruning(state_node, white_depth, -10e15, 10e15, True)
         # If white can play then change the game state
         if state is not None:
+            game_over = 0
             othello.state = state
             print("White turn")
             print(othello.state, "\n")
-        if othello.game_over_white and othello.game_over_black:
+        else:
+            game_over += 1
+        if othello.checkGameState():
             break
         # Black turn
         state_node = Node(n)
         state_node.state = np.copy(othello.state)
-        othello.normalMoveGenerator(state_node, black_depth, black.turn)
+        othello.normalMoveGenerator(state_node, black_depth, black.turn, othello.heuristic)
         value, state = black.alphaBetaPruning(state_node, black_depth, -10e15, 10e15, False)
         # If black can play then change the game state
         if state is not None:
-            othello.state = state
+            game_over = 0
             othello.state = state
             print("Black turn")
             print(othello.state, "\n")
+        else:
+            game_over += 1
+    end = time.time()
     print("======================== Game Over !!! ===========================")
     print("White score:", np.count_nonzero(othello.state == 1))
     print("Black score:", np.count_nonzero(othello.state == -1))
+    print("============================ Time ================================")
+    print("Time elapsed = ", str(end - start)," sec")
