@@ -259,7 +259,6 @@ class Othello:
             node = Node(self.size)
             node.state = child
             state_node.child.append(node)
-            self.normalMoveGenerator(node, depth - 1, turn * -1, heuristic)
 
     def orderedMoveGenerator(self, state_node, depth, turn, heuristic):
         if depth == 0:
@@ -281,7 +280,6 @@ class Othello:
             node = Node(self.size)
             node.state = children[child]
             state_node.child.append(node)
-            self.orderedMoveGenerator(node, depth - 1, turn * -1, heuristic)
 
     # state -> state to be evaluated
     def heuristic(self, state):
@@ -296,11 +294,11 @@ class Othello:
 
 if __name__ == "__main__":
     n = 8
-    white_depth = 6
-    black_depth = 6
+    white_depth = 5
+    black_depth = 5
     othello = Othello(n)
-    white = Agent(othello, 1)
-    black = Agent(othello, -1)
+    white = Agent(1, othello.heuristic, othello.normalMoveGenerator)
+    black = Agent(-1, othello.heuristic, othello.normalMoveGenerator)
     game_over = 0   # Equals 2 when both black and white can't play
     # Game loop
     start = time.time()
@@ -308,8 +306,7 @@ if __name__ == "__main__":
         state_node = Node(n)
         # White turn
         state_node.state = np.copy(othello.state)
-        othello.normalMoveGenerator(state_node, white_depth, white.turn, othello.heuristic)
-        value, state = white.alphaBetaPruning(state_node, white_depth, -10e15, 10e15, True)
+        value, state = white.alphaBetaPruning(state_node, white_depth, -10e15, 10e15, True, white.turn)
         # If white can play then change the game state
         if state is not None:
             game_over = 0
@@ -323,8 +320,7 @@ if __name__ == "__main__":
         # Black turn
         state_node = Node(n)
         state_node.state = np.copy(othello.state)
-        othello.normalMoveGenerator(state_node, black_depth, black.turn, othello.heuristic)
-        value, state = black.alphaBetaPruning(state_node, black_depth, -10e15, 10e15, False)
+        value, state = black.alphaBetaPruning(state_node, black_depth, -10e15, 10e15, False, black.turn)
         # If black can play then change the game state
         if state is not None:
             game_over = 0
