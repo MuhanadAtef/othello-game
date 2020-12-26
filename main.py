@@ -25,14 +25,15 @@ def writeToFile(size, white_depth, black_depth, avg_white_time, avg_black_time, 
 
 if __name__ == "__main__":
     n = 8  # Size of othello board
-    white_depth = 1  # Depth of white agent tree
-    black_depth = 8  # Depth of black agent tree
+    white_depth = 3  # Depth of white agent tree
+    black_depth = 3  # Depth of black agent tree
     game_over = 0  # Equals 2 when both black and white can't play
     num_turns_white = 0  # Number of turns of white agent
     num_turns_black = 0  # Number of turns of black agent
     white_playing_time = 0      # White time playing
     black_playing_time = 0      # Black time playing
     othello = Othello(n)
+    # Here choose heuristic and move generator of each agent
     white = Agent(1, othello.heuristic, othello.normalMoveGenerator)
     black = Agent(-1, othello.heuristic, othello.normalMoveGenerator)
     print("Initial State")
