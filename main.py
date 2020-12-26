@@ -25,8 +25,8 @@ def writeToFile(size, white_depth, black_depth, avg_white_time, avg_black_time, 
 
 if __name__ == "__main__":
     n = 8  # Size of othello board
-    white_depth = 6  # Depth of white agent tree
-    black_depth = 5  # Depth of black agent tree
+    white_depth = 3  # Depth of white agent tree
+    black_depth = 3  # Depth of black agent tree
     game_over = 0  # Equals 2 when both black and white can't play
     num_turns_white = 0  # Number of turns of white agent
     num_turns_black = 0  # Number of turns of black agent
@@ -35,6 +35,8 @@ if __name__ == "__main__":
     othello = Othello(n)
     white = Agent(1, othello.heuristic, othello.orderedMoveGenerator)
     black = Agent(-1, othello.heuristic, othello.normalMoveGenerator)
+    print("Initial State")
+    print(othello.state)
     # Game loop
     start = time.time()
     while (not othello.checkGameState()) and game_over < 2:
@@ -81,11 +83,11 @@ if __name__ == "__main__":
     print("Time elapsed = ", total_time, " sec")
     print("==================== Average branching factor ====================")
     avg_branch_white = np.ceil(white.traversed_nodes / (white.traversed_nodes - white.leaf_nodes))
-    eff_branch_white = np.ceil(np.power(white.num_branches / (white_depth * num_turns_white), 1 / white_depth))
+    eff_branch_white = np.ceil(np.power(white.traversed_nodes / (white_depth * num_turns_white), 1 / white_depth))
     print("Average branching factor (White agent) = ", avg_branch_white)
     print("Effective branching factor (White agent) = ", eff_branch_white)
     avg_branch_black = np.ceil(black.traversed_nodes / (black.traversed_nodes - black.leaf_nodes))
-    eff_branch_black = np.ceil(np.power(black.num_branches / (black_depth * num_turns_black), 1 / white_depth))
+    eff_branch_black = np.ceil(np.power(black.traversed_nodes / (black_depth * num_turns_black), 1 / black_depth))
     print("Average branching factor (Black agent) = ", avg_branch_black)
     print("Effective branching factor (Black agent) = ", eff_branch_black)
     writeToFile(n, white_depth, black_depth, white_playing_time/num_turns_white, black_playing_time/num_turns_black,
