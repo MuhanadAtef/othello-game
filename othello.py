@@ -1,23 +1,22 @@
 import numpy as np
 import time
-from agent import Agent
 
 
 class Node:
     def __init__(self, n):
         self.value = None
         self.child = []
-        self.state = np.zeros((n, n))
+        self.state = np.zeros((n, n), dtype=int)
 
 
 class Othello:
     def __init__(self, size):
         self.size = size  # Size of othello board
-        initial_node = np.zeros((self.size, self.size))
-        initial_node[n // 2 - 1][n // 2 - 1] = -1
-        initial_node[n // 2][n // 2] = -1
-        initial_node[n // 2 - 1][n // 2] = 1
-        initial_node[n // 2][n // 2 - 1] = 1
+        initial_node = np.zeros((self.size, self.size), dtype=int)
+        initial_node[size // 2 - 1][size // 2 - 1] = -1
+        initial_node[size // 2][size // 2] = -1
+        initial_node[size // 2 - 1][size // 2] = 1
+        initial_node[size // 2][size // 2 - 1] = 1
         self.state = initial_node  # Hold the state node of othello board
 
     # Here we will check for each disc and check for disc (left, right, diagonal)
@@ -271,12 +270,12 @@ class Othello:
         # Get value of each child to reorder them
         reordered_child = []
         for i in range(len(children)):
-            reordered_child.append((heuristic(children[i]), i))
-        # Sort ascending
-        if turn == -1 and depth == 0:
-            sorted(reordered_child, key=lambda x: x[0])
-        elif depth == 0:
-            sorted(reordered_child, key=lambda x: x[0], reverse=True)
+            reordered_child.append((heuristic(children[i], agent), i))
+        # Sort ascending for minimum
+        if turn == -1 and depth == 1:
+            reordered_child.sort(key=lambda x: x[0])
+        elif depth == 1:
+            reordered_child.sort(key=lambda x: x[0], reverse=True)
         for val, child in reordered_child:
             node = Node(self.size)
             node.state = children[child]
@@ -295,48 +294,3 @@ class Othello:
         if zeros == 0:
             return True
         return False
-
-
-if __name__ == "__main__":
-    n = 16
-    white_depth = 4
-    black_depth = 4
-    othello = Othello(n)
-    white = Agent(1, othello.heuristic, othello.normalMoveGenerator)
-    black = Agent(-1, othello.heuristic, othello.normalMoveGenerator)
-    game_over = 0   # Equals 2 when both black and white can't play
-    # Game loop
-    start = time.time()
-    while (not othello.checkGameState()) and game_over < 2:
-        state_node = Node(n)
-        # White turn
-        state_node.state = np.copy(othello.state)
-        value, state = white.alphaBetaPruning(state_node, white_depth, -10e15, 10e15, True, white.turn)
-        # If white can play then change the game state
-        if state is not None:
-            game_over = 0
-            othello.state = state
-            print("White turn")
-            print(othello.state, "\n")
-        else:
-            game_over += 1
-        if othello.checkGameState():
-            break
-        # Black turn
-        state_node = Node(n)
-        state_node.state = np.copy(othello.state)
-        value, state = black.alphaBetaPruning(state_node, black_depth, -10e15, 10e15, False, black.turn)
-        # If black can play then change the game state
-        if state is not None:
-            game_over = 0
-            othello.state = state
-            print("Black turn")
-            print(othello.state, "\n")
-        else:
-            game_over += 1
-    end = time.time()
-    print("======================== Game Over !!! ===========================")
-    print("White score:", np.count_nonzero(othello.state == 1))
-    print("Black score:", np.count_nonzero(othello.state == -1))
-    print("============================ Time ================================")
-    print("Time elapsed = ", str(end - start), " sec")

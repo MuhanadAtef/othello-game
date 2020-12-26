@@ -2,10 +2,15 @@ class Agent:
     # turn -> 1 for white and -1 for black
     # heuristic -> game evaluation function
     # move_generator -> generating moves function
+    # traversed_nodes -> visited nodes of the tree
+    # num_branches -> total branches of the tree
     def __init__(self, turn, heuristic, move_generator):
         self.turn = turn
         self.heuristic = heuristic
         self.move_generator = move_generator
+        self.traversed_nodes = 0
+        self.num_branches = 0
+        self.leaf_nodes = 0
 
     # root -> current state of the tree
     # depth -> depth of the tree
@@ -13,8 +18,10 @@ class Agent:
     # beta -> beta value
     def alphaBetaPruning(self, root, depth, alpha, beta, maximize, turn):
         self.move_generator(root, depth, turn, self.heuristic, self.turn)
+        self.num_branches += len(root.child)
         # If we reach leaves of the tree then select generator to goto next state
         if not root.child or depth == 0:
+            self.leaf_nodes += 1
             # Check if the evaluation value is computed
             if root.value is None:
                 root.value = self.heuristic(root.state, self.turn)
@@ -31,6 +38,7 @@ class Agent:
                 alpha = max(alpha, max_evaluation)
                 if beta <= alpha:
                     break
+                self.traversed_nodes += 1
             root.value = max_evaluation
             return max_evaluation, optimal_move
         else:
@@ -44,5 +52,6 @@ class Agent:
                 beta = min(beta, min_evaluation)
                 if beta <= alpha:
                     break
+                self.traversed_nodes += 1
             root.value = min_evaluation
             return min_evaluation, optimal_move
